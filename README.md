@@ -426,7 +426,8 @@ int main() {
                 move(0, entry->d_name);  //pindah file ke folder indomie
 
             }
-            else if (entry->d_type == DT_DIR && entry->d_name[0] != '.') { //cek jika item adalah sebuah folder yang bukan . dan .. 
+            else if (entry->d_type == DT_DIR && entry->d_name[0] != '.') { 
+	    	//cek jika item adalah sebuah folder yang bukan . dan .. 
                 file_count++;
                 move(1, entry->d_name); //pindah ke folder sedaap
             }
