@@ -20,11 +20,10 @@ int main(int argc, char *argv[]) {
     getcwd(cwd, sizeof(cwd));
     int status;
     int test;
-    int pid2 = getpid() + 2;
-    int pid3 = getpid() + 3;
+    int pid2 = getpid();
 
     child_id = fork();
-    printf("%d\n", child_id);
+//     printf("%d\n", child_id);
     if (child_id < 0) exit(EXIT_FAILURE);
 
     if (child_id == 0) {
@@ -41,7 +40,7 @@ int main(int argc, char *argv[]) {
         sprintf(files, "%s/killer.c", cwd);
 
         if (argv[1][1] == 'a') strcpy(mode, " char *argv[] = {\"killall\", \"-s\", \"9\", \"soal2\", NULL};");
-        else if (argv[1][1] == 'b') sprintf(mode, " char *argv[] = {\"kill\", \"%d\", \"%d\", NULL};", pid2, pid3);
+        else if (argv[1][1] == 'b') sprintf(mode, " char *argv[] = {\"kill\", \"%d\", NULL};", pid2);
         
         sprintf(data,   "#include <stdlib.h>\n"
                         "#include <sys/types.h>\n"
@@ -76,7 +75,7 @@ int main(int argc, char *argv[]) {
     while (wait(&status)>0);
 
     child_id2 = fork();
-    printf("%d\n", child_id2);
+//     printf("%d\n", child_id2);
     if (child_id2 < 0) exit(EXIT_FAILURE);
 
     if (child_id2 == 0) {
@@ -92,7 +91,7 @@ int main(int argc, char *argv[]) {
     pid_t pid, sid;        // Variabel untuk menyimpan PID
 
     pid = fork();     // Menyimpan PID dari Child Process
-    printf("%d\n", pid);
+//     printf("%d\n", pid);
     /* Keluar saat fork gagal
     * (nilai variabel pid < 0) */
     if (pid < 0) {
@@ -105,24 +104,24 @@ int main(int argc, char *argv[]) {
         exit(EXIT_SUCCESS);
     }
 
-    // umask(0);
+    umask(0);
 
-    // sid = setsid();
-    // if (sid < 0) {
+    sid = setsid();
+    if (sid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // if ((chdir("/")) < 0) {
     //     exit(EXIT_FAILURE);
     // }
 
-    // // if ((chdir("/")) < 0) {
-    // //     exit(EXIT_FAILURE);
-    // // }
-
-    // close(STDIN_FILENO);
-    // close(STDOUT_FILENO);
-    // close(STDERR_FILENO);
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
     while (1) {
         pid_t child1, child2, child3, child4;
-        // int status;
+        int status;
         
         time_t rawtime;
         struct tm * timeinfo;
