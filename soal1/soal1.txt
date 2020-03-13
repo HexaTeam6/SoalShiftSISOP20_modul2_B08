@@ -1,0 +1,5 @@
+Compile:
+gcc soal1.c -o program
+
+Run :
+./program \* 34 7 /home/user/test.sh
