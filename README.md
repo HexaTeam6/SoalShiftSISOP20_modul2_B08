@@ -7,10 +7,10 @@ Soal Shift Modul 2 yang berfokus pada penggunaan exec, fork, wait, dan daemon.
 Buatlah program C yang menyerupai crontab untuk menjalankan script bash dengan
 ketentuan sebagai berikut:
   1.  Program menerima 4 argumen berupa:
-      i.    Detik: 0-59 atau * (any value)
-      ii.   Menit: 0-59 atau * (any value)
-      iii.  Jam: 0-23 atau * (any value)
-      iv.   Path file .sh
+      1.1.    Detik: 0-59 atau * (any value)
+      1.2.   Menit: 0-59 atau * (any value)
+      1.3.  Jam: 0-23 atau * (any value)
+      1.4.   Path file .sh
   2.  Program akan mengeluarkan pesan error jika argumen yang diberikan tidak
       sesuai.
   3.  Program hanya menerima 1 config cron.
