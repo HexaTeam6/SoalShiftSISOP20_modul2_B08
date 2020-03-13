@@ -1,16 +1,0 @@
---2020-03-13 16:38:04--  https://picsum.photos/384
-Resolving picsum.photos (picsum.photos)... 104.26.5.30, 104.26.4.30, 2606:4700:20::681a:41e, ...
-Connecting to picsum.photos (picsum.photos)|104.26.5.30|:443... connected.
-HTTP request sent, awaiting response... 302 Found
-Location: https://i.picsum.photos/id/1063/384/384.jpg [following]
---2020-03-13 16:38:05--  https://i.picsum.photos/id/1063/384/384.jpg
-Resolving i.picsum.photos (i.picsum.photos)... 104.26.5.30, 104.26.4.30, 2606:4700:20::681a:51e, ...
-Connecting to i.picsum.photos (i.picsum.photos)|104.26.5.30|:443... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: unspecified [image/jpeg]
-Saving to: ‘2020-03-13_16:38:04/2020-03-13_16:38:04’
-
-2020-03-13_16:38:04/2020-03-13_16:38:04       [<=>                                                                                   ]       0  --.-KB/s               2020-03-13_16:38:04/2020-03-13_16:38:04       [ <=>                                                                                  ]  40,73K  --.-KB/s    in 0,01s   
-
-2020-03-13 16:38:06 (2,99 MB/s) - ‘2020-03-13_16:38:04/2020-03-13_16:38:04’ saved [41708]
-
