@@ -198,7 +198,7 @@ else {
   // Jika error print error, jika tidak maka program akan lanjut
 }     
 ````
-Dimana apabila inputan lebih dari 4 argumen atau inputan angka dengan bintang secara bersamaan 
+Dimana apabila inputan lebih dari 4 argumen atau inputan angka dengan bintang secara bersamaan atau digit yang diberikan lebih dari 2
 maka akan mengeluarkan tulisan error. Tetapi jika config cron benar maka program akan lanjut.
 
 Setelah mengammbil argumen, maka config cron akan dicek. Apabila terdapat bintang pada detik atau menit atau jam, maka kita akan mengeset i(detik) atau j(menit)atau k(jam) sesuai dengan local time.
@@ -213,7 +213,8 @@ i = tm.tm_sec;  // Untuk detik
 j = tm.tm_min;  // Untuk menit
 k = tm.tm_hour; // Untuk jam
 ````
-Jika tidak ada bintang, maka kita akan mengeset masing - masing variable sesuai inputan yang ada.
+Jika tidak ada bintang, maka kita akan mengeset masing - masing variable sesuai inputan yang ada menggunakan `atoi()` 
+untuk merubah argumen string menjadi integer dan perlu meng-include `#include <stdlib.h>`.
 ````
 i = atoi(argv[1]);  // Untuk detik
 j = atoi(argv[2]);  // Untuk menit
