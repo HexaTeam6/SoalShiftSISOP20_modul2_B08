@@ -578,8 +578,10 @@ execv("/bin/rm", argv);
 ````
 Lalu program juga diminta untuk dapat menjalan kan 2 mode dengan ditentukan dari argumen yang di passing, jika -a maka saat file killer dijalankan pogram akan langsung mati, namun jika -b program harus menyelesaikan satu proses lalu mati. Sehingga perlu adanya pengecekkan terkait argumen yang diterima serta dibuat perbedaan proses execv pada file killer dengan -a menggunakan killall dan -b menggunakan kill pid.
 ````
-if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b')
+if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b'){
         printf("argumen only -a or -b");
+        return 0;
+    }
 
 ...
 
