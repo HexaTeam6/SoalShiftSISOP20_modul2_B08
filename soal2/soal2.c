@@ -9,9 +9,71 @@
 #include <time.h>   
 
 int main() {
+    pid_t child_id, child_id2;
+    char cwd[100];
+    getcwd(cwd, sizeof(cwd));
+    int status;
+
+    child_id = fork();
+    if (child_id < 0) exit(EXIT_FAILURE);
+
+    if (child_id == 0) {
+        FILE *ptr;
+        char files[100];
+        char data[1000];
+        char dst[100];
+        char src[100];
+
+        sprintf(src, "%s/killer.c", cwd);
+        sprintf(dst, "%s/killer", cwd);
+
+        sprintf(files, "%s/killer.c", cwd);
+        ptr = fopen(files, "w");
+        fputs(  "#include <stdlib.h>\n"
+                "#include <sys/types.h>\n"
+                "#include <unistd.h>\n"
+                "#include <stdio.h>\n"
+                "#include <wait.h>\n"
+                "#include <string.h>\n"
+
+                " int main() {"
+                " pid_t child_id;"
+                " int status;"
+
+                " child_id = fork();"
+                " if (child_id < 0) exit(EXIT_FAILURE);"
+
+                " if (child_id == 0) {"
+                    " char *argv[] = {\"killall\", \"-s\", \"9\", \"soal2\", NULL};"
+                    " execv(\"/usr/bin/killall\", argv);"
+                " } else {"
+                    " while (wait(&status)>0);"
+                " }"
+                " }", ptr);
+        fclose(ptr);
+
+        char *argv[] = {"gcc", src, "-o", dst, NULL};
+        execv("/usr/bin/gcc", argv);
+    }
+    
+    while (wait(&status)>0);
+
+    child_id2 = fork();
+    if (child_id2 < 0) exit(EXIT_FAILURE);
+
+    if (child_id2 == 0) {
+        char src[100];
+
+        sprintf(src, "%s/killer.c", cwd);
+        char *argv[] = {"rm", src, NULL};
+        execv("/bin/rm", argv);
+    }
+    
+    while (wait(&status)>0);
+
     while(1){
         pid_t child1, child2, child3, child4;
-        int status;
+        // int status;
         
         time_t rawtime;
         struct tm * timeinfo;
@@ -29,7 +91,7 @@ int main() {
         if (child1 < 0) exit(EXIT_FAILURE);
 
         if (child1 == 0) {
-            for(int i=0;i<20;i++) // loop will run n times (n=5) 
+            for(int i=0;i<20;i++)
             { 
                 if(fork() == 0) 
                 { 
@@ -58,7 +120,7 @@ int main() {
                 } 
                 sleep(5);
             } 
-            for(int i=0;i<20;i++) // loop will run n times (n=5) 
+            for(int i=0;i<20;i++)
             wait(NULL); 
         }
 
