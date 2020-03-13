@@ -12,8 +12,10 @@
 #include <time.h>   
 
 int main(int argc, char *argv[]) {
-    if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b')
+    if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b'){
         printf("argumen only -a or -b");
+        return 0;
+    }
 
     pid_t child_id, child_id2;
     char cwd[100];
