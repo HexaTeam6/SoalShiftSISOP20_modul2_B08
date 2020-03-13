@@ -8,9 +8,9 @@ Buatlah program C yang menyerupai crontab untuk menjalankan script bash dengan
 ketentuan sebagai berikut:
   1.  Program menerima 4 argumen berupa:
       1.    Detik: 0-59 atau * (any value)
-      2.   Menit: 0-59 atau * (any value)
-      3.  Jam: 0-23 atau * (any value)
-      4.   Path file .sh
+      2.    Menit: 0-59 atau * (any value)
+      3.    Jam: 0-23 atau * (any value)
+      4.    Path file .sh
   2.  Program akan mengeluarkan pesan error jika argumen yang diberikan tidak
       sesuai.
   3.  Program hanya menerima 1 config cron.
@@ -22,6 +22,230 @@ Program dengan argumen seperti contoh di atas akan menjalankan script test.sh se
 detik pada jam 07:34.
 
 ### Penyelesaian
+
+Berikut ini merupakan kode C untuk menyelesaikan soal no.1
+````
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+#include <time.h>
+
+int main(int argc, char *argv[]) {
+	if(argc > 5) {
+    	printf("Error\n");
+  	}
+  	else {
+  		if(strlen(argv[1]) > 2 || strlen(argv[2]) > 2 || strlen(argv[3]) > 2) {
+  			printf("Error\n");
+		}
+		else {
+			int error = 0, set = 0;
+			
+			if(argv[1][0] == '*' && argv[1][1] != 0) {
+				error = 1;
+			}
+			
+			if(argv[2][0] == '*' && argv[2][1] != 0) {
+				error = 1;
+			}
+			
+			if(argv[3][0] == '*' && argv[3][1] != 0) {
+				error = 1;
+			}
+			
+			if(argv[1][0] != '*' && argv[1][1] == '*') {
+				error = 1;
+			}
+			
+			if(argv[2][0] != '*' && argv[2][1] == '*') {
+				error = 1;
+			}
+			
+			if(argv[3][0] != '*' && argv[3][1] == '*') {
+				error = 1;
+			}
+
+			if(error == 1) {
+				printf("Error\n");
+			}
+			else {
+				pid_t pid, sid;
+			
+				pid = fork();
+			
+				if (pid < 0) {
+				    exit(EXIT_FAILURE);
+				}
+				
+				if (pid > 0) {
+				    exit(EXIT_SUCCESS);
+				}
+				
+				umask(0);
+				
+				sid = setsid();
+				if (sid < 0) {
+				    exit(EXIT_FAILURE);
+				}
+				
+				close(STDIN_FILENO);
+				close(STDOUT_FILENO);
+				close(STDERR_FILENO);
+				
+				while (1) {
+				    time_t t = time(NULL);
+				    struct tm tm = *localtime(&t);
+				
+				    int i, j, k;
+					
+					if(set == 0) {
+						if(argv[1][0] == '*') {
+				        	i = tm.tm_sec;
+					    }
+					    else {
+					        i = atoi(argv[1]);
+					    }
+					
+					    if(argv[2][0] == '*') {
+					        j = tm.tm_min;
+					    }
+					    else {
+					        j = atoi(argv[2]);
+					    }
+					
+					    if(argv[3][0] == '*') {
+					        k = tm.tm_hour;
+					    }
+					    else {
+					        k = atoi(argv[3]);
+					    }
+					    
+					    set++;
+					}
+				    
+				    if(set > 0) {
+				       if(argv[1][0] == '*') {
+				          i = tm.tm_sec;
+				       }
+				       if(argv[2][0] == '*') {
+				          j = tm.tm_min;
+				       }
+				       if(argv[3][0] == '*') {
+				          k = tm.tm_hour;
+				       }
+				    }
+				
+				    if(tm.tm_sec == i && tm.tm_min == j && tm.tm_hour == k) {
+				       	if(fork() == 0) {
+                  char *argm[] = {"bash", argv[4], NULL};
+                  execv("/bin/sh", argm);
+                }
+				    }
+				
+				    sleep(1);
+				}
+			}
+		}
+ 	}
+}
+````
+
+Dimana program hanya akan menerima 4 argumen yaitu detik, menit, jam, dan path file.sh menggunakan
+`int main(int argc, char *argv[])` tetapi kita harus meng-include `#include <stdio.h>`.
+
+Untuk mengatasi error pada argumen yang tidak sesuai yaitu menggunakan
+````
+if(argc > 5) {
+    	printf("Error\n");
+}
+else {
+  		if(strlen(argv[1]) > 2 || strlen(argv[2]) > 2 || strlen(argv[3]) > 2) {
+  			printf("Error\n");
+      }
+      else {
+        int error = 0, set = 0;
+
+        if(argv[1][0] == '*' && argv[1][1] != 0) {
+          error = 1;
+        }
+
+        if(argv[2][0] == '*' && argv[2][1] != 0) {
+          error = 1;
+        }
+
+        if(argv[3][0] == '*' && argv[3][1] != 0) {
+          error = 1;
+        }
+
+        if(argv[1][0] != '*' && argv[1][1] == '*') {
+          error = 1;
+        }
+
+        if(argv[2][0] != '*' && argv[2][1] == '*') {
+          error = 1;
+        }
+
+        if(argv[3][0] != '*' && argv[3][1] == '*') {
+          error = 1;
+        }
+        
+  // Jika error print error, jika tidak maka program akan lanjut
+}     
+````
+Dimana apabila inputan lebih dari 4 argumen atau inputan angka dengan bintang secara bersamaan 
+maka akan mengeluarkan tulisan error. Tetapi jika config cron benar maka program akan lanjut.
+
+Setelah mengammbil argumen, maka config cron akan dicek. Apabila terdapat bintang pada detik atau menit atau jam, maka kita akan mengeset i(detik) atau j(menit)atau k(jam) sesuai dengan local time.
+Untuk mengambil waktu sesuai dengan local time, kita menggunakan
+````
+time_t t = time(NULL);
+struct tm tm = *localtime(&t);
+````
+Lalu mengeset masing - masing variabel yang berhubungan dengan bintang dengan cara
+````
+i = tm.tm_sec;  // Untuk detik
+j = tm.tm_min;  // Untuk menit
+k = tm.tm_hour; // Untuk jam
+````
+Jika tidak ada bintang, maka kita akan mengeset masing - masing variable sesuai inputan yang ada.
+````
+i = atoi(argv[1]);  // Untuk detik
+j = atoi(argv[2]);  // Untuk menit
+k = atoi(argv[3]);  // Untuk jam
+````
+
+Lalu kita akan melakukan proses `bash` dengan menggunakan `execv` ketika waktu pada local time 
+sudah sesuai dengan config cron yang diinputkan.
+````
+if(tm.tm_sec == i && tm.tm_min == j && tm.tm_hour == k) {
+				     if(fork() == 0) {
+                char *argm[] = {"bash", argv[4], NULL};
+                  execv("/bin/sh", argm);
+             }
+}
+````
+Lalu kita akan mengeset `sleep();` menjadi `sleep(1);` agar proses daemon berjalan (mengecek) per detik.
+
+Untuk mengatasi config cron yang memakai bintang yaitu kita perlu mengeset kembali dengan cara
+````
+if(set > 0) {
+				       if(argv[1][0] == '*') {
+				          i = tm.tm_sec;
+				       }
+				       if(argv[2][0] == '*') {
+				          j = tm.tm_min;
+				       }
+				       if(argv[3][0] == '*') {
+				          k = tm.tm_hour;
+				       }
+ }
+ ````
 
 ## SOAL 2
 
