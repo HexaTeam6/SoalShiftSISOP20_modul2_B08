@@ -439,7 +439,9 @@ int main() {
 
         char dir[300];
         FILE * ptr;
-        dirp = opendir("/home/hexa/modul2/indomie/"); //membuka isi dari direktori indomie lalu dilakukan loop sejumlah item yang ada didalamnya
+	//membuka isi dari direktori indomie lalu dilakukan loop sejumlah item yang ada didalamnya
+        dirp = opendir("/home/hexa/modul2/indomie/"); 
+	
         while ((entry = readdir(dirp)) != NULL) {
             if (entry->d_name[0] != '.') { // dicek apakah item bukan folder . dan ..
                 //buat file coba1.txt pada setiap item
@@ -529,5 +531,6 @@ Untuk melakukan proses semua yang diatas, maka kita perlu membuat 3 proses anak 
   1. anak ketiga akan melakukan proses membuat direktori	(menunggu proses anak kedua)
   2. anak kedua akan melakukan proses meng-ekstrak file 	(menunggu proses anak ketiga)
   3. anak pertama akan melakukan pemindahan secara pengelompokan
+
 Parent akan menunggu semua proses child, apabila semua proses child selesai maka parent akan memindahkan setiap direktori ke “/home/[USER]/modul2/indomie/” serta membuat dua file kosong. File yang pertama diberi nama “coba1.txt”, lalu 3 detik kemudian 
 membuat file bernama “coba2.txt”.
