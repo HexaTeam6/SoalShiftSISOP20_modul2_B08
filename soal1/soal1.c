@@ -9,7 +9,20 @@
 #include <string.h>
 #include <time.h>
 
+int checkfile(const char *fname)
+{
+    FILE *file;
+    if ((file = fopen(fname, "r")))
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
+	struct stat sts;
+
 	if(argc > 5) {
     	printf("Error\n");
   	}
@@ -19,7 +32,11 @@ int main(int argc, char *argv[]) {
 		}
 		else {
 			int error = 0, set = 0;
-			
+
+			if(argv[1][0] == '-' || argv[2][0] == '-' || argv[3][0] == '-') {
+				error = 1;
+			}
+
 			if(argv[1][0] == '*' && argv[1][1] != 0) {
 				error = 1;
 			}
@@ -41,6 +58,22 @@ int main(int argc, char *argv[]) {
 			}
 			
 			if(argv[3][0] != '*' && argv[3][1] == '*') {
+				error = 1;
+			}
+
+			if(argv[1][0] != '*' && atoi(argv[1]) > 59) {
+				error = 1;
+			}
+
+			if(argv[2][0] != '*' && atoi(argv[2]) > 59) {
+				error = 1;
+			}
+
+			if(argv[3][0] != '*' && atoi(argv[3]) > 23) {
+				error = 1;
+			}
+
+			if(checkfile(argv[4]) == 0) {
 				error = 1;
 			}
 
@@ -127,3 +160,4 @@ int main(int argc, char *argv[]) {
 		}
  	}
 }
+

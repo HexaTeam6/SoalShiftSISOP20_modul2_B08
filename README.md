@@ -36,7 +36,20 @@ Berikut ini merupakan kode C untuk menyelesaikan soal no.1
 #include <string.h>
 #include <time.h>
 
+int checkfile(const char *fname)
+{
+    FILE *file;
+    if ((file = fopen(fname, "r")))
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
+	struct stat sts;
+
 	if(argc > 5) {
     	printf("Error\n");
   	}
@@ -46,7 +59,11 @@ int main(int argc, char *argv[]) {
 		}
 		else {
 			int error = 0, set = 0;
-			
+
+			if(argv[1][0] == '-' || argv[2][0] == '-' || argv[3][0] == '-') {
+				error = 1;
+			}
+
 			if(argv[1][0] == '*' && argv[1][1] != 0) {
 				error = 1;
 			}
@@ -68,6 +85,22 @@ int main(int argc, char *argv[]) {
 			}
 			
 			if(argv[3][0] != '*' && argv[3][1] == '*') {
+				error = 1;
+			}
+
+			if(argv[1][0] != '*' && atoi(argv[1]) > 59) {
+				error = 1;
+			}
+
+			if(argv[2][0] != '*' && atoi(argv[2]) > 59) {
+				error = 1;
+			}
+
+			if(argv[3][0] != '*' && atoi(argv[3]) > 23) {
+				error = 1;
+			}
+
+			if(checkfile(argv[4]) == 0) {
 				error = 1;
 			}
 
@@ -143,9 +176,9 @@ int main(int argc, char *argv[]) {
 				
 				    if(tm.tm_sec == i && tm.tm_min == j && tm.tm_hour == k) {
 				       	if(fork() == 0) {
-					  char *argm[] = {"bash", argv[4], NULL};
-					  execv("/bin/sh", argm);
-					}
+							char *argm[] = {"bash", argv[4], NULL};
+							execv("/bin/sh", argm);
+						}
 				    }
 				
 				    sleep(1);
@@ -154,6 +187,8 @@ int main(int argc, char *argv[]) {
 		}
  	}
 }
+
+
 ````
 
 Dimana program hanya akan menerima 4 argumen yaitu detik, menit, jam, dan path file.sh menggunakan
@@ -163,43 +198,64 @@ Untuk mengatasi error pada argumen yang tidak sesuai yaitu menggunakan
 ````
 if(argc > 5) {
     	printf("Error\n");
-}
-else {
-  		if(strlen(argv[1]) > 2 || strlen(argv[2]) > 2 || strlen(argv[3]) > 2) {
-  			printf("Error\n");
-      }
-      else {
-        int error = 0, set = 0;
+ }
+ else {
+  	if(strlen(argv[1]) > 2 || strlen(argv[2]) > 2 || strlen(argv[3]) > 2) {
+  		printf("Error\n");
+	}
+	else {
+		int error = 0, set = 0;
 
-        if(argv[1][0] == '*' && argv[1][1] != 0) {
-          error = 1;
-        }
+		if(argv[1][0] == '-' || argv[2][0] == '-' || argv[3][0] == '-') {
+			error = 1;
+		}
 
-        if(argv[2][0] == '*' && argv[2][1] != 0) {
-          error = 1;
-        }
+		if(argv[1][0] == '*' && argv[1][1] != 0) {
+			error = 1;
+		}
+			
+		if(argv[2][0] == '*' && argv[2][1] != 0) {
+			error = 1;
+		}
+			
+		if(argv[3][0] == '*' && argv[3][1] != 0) {
+			error = 1;
+		}
+			
+		if(argv[1][0] != '*' && argv[1][1] == '*') {
+			error = 1;
+		}
+			
+		if(argv[2][0] != '*' && argv[2][1] == '*') {
+			error = 1;
+		}
+			
+		if(argv[3][0] != '*' && argv[3][1] == '*') {
+			error = 1;
+		}
 
-        if(argv[3][0] == '*' && argv[3][1] != 0) {
-          error = 1;
-        }
+		if(argv[1][0] != '*' && atoi(argv[1]) > 59) {
+			error = 1;
+		}
 
-        if(argv[1][0] != '*' && argv[1][1] == '*') {
-          error = 1;
-        }
+		if(argv[2][0] != '*' && atoi(argv[2]) > 59) {
+			error = 1;
+		}
 
-        if(argv[2][0] != '*' && argv[2][1] == '*') {
-          error = 1;
-        }
+		if(argv[3][0] != '*' && atoi(argv[3]) > 23) {
+			error = 1;
+		}
 
-        if(argv[3][0] != '*' && argv[3][1] == '*') {
-          error = 1;
-        }
+		if(checkfile(argv[4]) == 0) {
+			error = 1;
+		}
         
-  // Jika error print error, jika tidak maka program akan lanjut
+  // Jika error = 1 print error, jika tidak maka program akan lanjut
 }     
 ````
 Dimana apabila inputan lebih dari 4 argumen atau inputan angka dengan bintang secara bersamaan atau digit yang diberikan lebih dari 2
-maka akan mengeluarkan tulisan error. Tetapi jika config cron benar maka program akan lanjut.
+atau bilangan negatif atau bilangan yang lebih dari batas waktu masing - masing (detik, menit, jam) atau file path yang diberikan
+tidak ada maka akan mengeluarkan tulisan error. Tetapi jika config cron benar maka program akan lanjut.
 
 Setelah mengammbil argumen, maka config cron akan dicek. Apabila terdapat bintang pada detik atau menit atau jam, maka kita akan mengeset i(detik) atau j(menit)atau k(jam) sesuai dengan local time.
 Untuk mengambil waktu sesuai dengan local time, kita menggunakan
@@ -578,8 +634,10 @@ execv("/bin/rm", argv);
 ````
 Lalu program juga diminta untuk dapat menjalan kan 2 mode dengan ditentukan dari argumen yang di passing, jika -a maka saat file killer dijalankan pogram akan langsung mati, namun jika -b program harus menyelesaikan satu proses lalu mati. Sehingga perlu adanya pengecekkan terkait argumen yang diterima serta dibuat perbedaan proses execv pada file killer dengan -a menggunakan killall dan -b menggunakan kill pid.
 ````
-if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b')
+if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b'){
         printf("argumen only -a or -b");
+        return 0;
+    }
 
 ...
 
