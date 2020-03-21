@@ -35,8 +35,8 @@ void createKiller(pid_t pid, char param){
 
         sprintf(files, "%s/killer.c", cwd);
 
-        if (param == 'a') strcpy(mode, " char *argv[] = {\"killall\", \"-s\", \"9\", \"soal2\", NULL};");
-        else if (param == 'b') sprintf(mode, " char *argv[] = {\"kill\", \"%d\", NULL};", pid);
+        if (param == 'a') strcpy(mode, " char *argv[] = {\"killall\", \"-s\", \"9\", \"soal2\", NULL}; execv(\"/usr/bin/killall\", argv);");
+        else if (param == 'b') sprintf(mode, " char *argv[] = {\"kill\", \"%d\", NULL}; execv(\"/bin/kill\", argv);", pid);
         
         sprintf(data,   "#include <stdlib.h>\n"
                         "#include <sys/types.h>\n"
@@ -54,7 +54,6 @@ void createKiller(pid_t pid, char param){
 
                         " if (child_id == 0) {"
                             " %s"
-                            " execv(\"/usr/bin/killall\", argv);"
                         " } else {"
                             " while (wait(&status)>0);"
                             " char *argv[] = {\"rm\", \"%s/killer\", NULL};"
@@ -93,6 +92,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    char cwd[100];
+    getcwd(cwd, sizeof(cwd));
+
     pid_t pid, sid;    
 
     pid = fork(); 
@@ -108,6 +110,8 @@ int main(int argc, char *argv[]) {
         exit(EXIT_SUCCESS);
     }
 
+
+    createKiller(getpid(), argv[1][1]);
     // printf("1 %d\n", getpid());
 
     umask(0);
@@ -124,76 +128,69 @@ int main(int argc, char *argv[]) {
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
 
-    createKiller(pid, argv[1][1]);
-
     while (1) {
-        pid_t child1, child2, child3, child4;
-        int status;
-        
-        time_t rawtime;
-        struct tm * timeinfo;
-        char buffer [80];
+    pid_t child1, child2, child3, child4;
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer [80];
+    char pathDir [100];
 
-        time (&rawtime);
-        timeinfo = localtime (&rawtime);
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
 
-        strftime (buffer,80,"%Y-%m-%d_%H:%M:%S",timeinfo);
-        // puts (buffer);
-        char *dir = buffer;
-        mkdir(dir,0777);
+    strftime (buffer,80,"%Y-%m-%d_%H:%M:%S",timeinfo);
+    sprintf(pathDir, "%s/%s", cwd, buffer);
 
-        child1 = fork();
-        if (child1 < 0) exit(EXIT_FAILURE);
-
-        if (child1 == 0) {
-            for(int i=0;i<20;i++)
-            { 
-                if(fork() == 0) 
-                { 
-                    unsigned long get_time = (unsigned long)time(NULL);
-                    get_time = (get_time%1000) + 100;
-
-                    char link[50];
-                    sprintf(link, "https://picsum.photos/%lu", get_time);
-                    
-                    time_t filet;
-                    struct tm * fileti;
-                    char files [80] = "";
-                    char down_dir[100];
-                    
-                    time (&filet);
-                    fileti = localtime (&filet);
-
-                    strftime (files,80,"%Y-%m-%d_%H:%M:%S",fileti);
-                    sprintf(down_dir, "%s/%s", buffer, files);
-                    // puts(down_dir);
-
-
-                    char *argv[] = {"wget", "-O", down_dir, link, NULL};
-                    execv("/usr/bin/wget", argv);
-                    exit(0); 
-                } 
-                sleep(5);
-            } 
-            for(int i=0;i<20;i++)
-            wait(NULL); 
-        }
-
-        while (wait(&status)>0);
-
-        child2 = fork();
-        if (child2 < 0) exit(EXIT_FAILURE);
-
-        if (child2 == 0) {
+    
+    if(fork()==0){
+      int status1, i;
+      if(fork()==0){
+        char *argu[] = {"mkdir", "-p", pathDir, NULL};
+        execv("/bin/mkdir", argu);
+      }
+      while ((wait(&status1)) > 0);
+      for(i=0 ; i<=20 ; i++){
+        // dirname2=dirname;
+        if(i==20){
+          int status2;
+          if(fork()==0){
             char zip_name[100];
             sprintf(zip_name, "%s.zip", buffer);
 
-            char *argv[] = {"zip", "-rm", zip_name, buffer, NULL};
+            char *argv[] = {"zip", "-rm", zip_name, pathDir, NULL};
             execv("/usr/bin/zip", argv);
-            exit(0); 
+          }
+          else{
+            while ((wait(&status2)) > 0);
+          }
         }
 
-        while (wait(&status)>0);
-        sleep(30);
+        unsigned long get_time = (unsigned long)time(NULL);
+        get_time = (get_time%1000) + 100;
+
+        char link[50];
+        sprintf(link, "https://picsum.photos/%lu", get_time);
+        
+        time_t filet;
+        struct tm * fileti;
+        char files [80] = "";
+        char down_dir[100];
+        
+        time (&filet);
+        fileti = localtime (&filet);
+
+        strftime (files,80,"%Y-%m-%d_%H:%M:%S",fileti);
+        sprintf(down_dir, "%s/%s", buffer, files);
+        // puts(down_dir);
+
+        if(fork()==0){
+          char *argv[] = {"wget", "-O", down_dir, link, NULL};
+          execv("/usr/bin/wget", argv);
+        }
+        sleep(5);
+      }
     }
+    sleep(30);
+  }
 }
