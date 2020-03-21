@@ -9,18 +9,14 @@
 #include <wait.h>
 #include <string.h>
 #include <dirent.h>
-#include <time.h>   
+#include <time.h>
 
-int main(int argc, char *argv[]) {
-    if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b')
-        printf("argumen only -a or -b");
-
+void createKiller(pid_t pid, char param){
     pid_t child_id, child_id2;
     char cwd[100];
     getcwd(cwd, sizeof(cwd));
     int status;
     int test;
-    int pid2 = getpid();
 
     child_id = fork();
 //     printf("%d\n", child_id);
@@ -39,8 +35,8 @@ int main(int argc, char *argv[]) {
 
         sprintf(files, "%s/killer.c", cwd);
 
-        if (argv[1][1] == 'a') strcpy(mode, " char *argv[] = {\"killall\", \"-s\", \"9\", \"soal2\", NULL};");
-        else if (argv[1][1] == 'b') sprintf(mode, " char *argv[] = {\"kill\", \"%d\", NULL};", pid2);
+        if (param == 'a') strcpy(mode, " char *argv[] = {\"killall\", \"-s\", \"9\", \"soal2\", NULL};");
+        else if (param == 'b') sprintf(mode, " char *argv[] = {\"kill\", \"%d\", NULL};", pid);
         
         sprintf(data,   "#include <stdlib.h>\n"
                         "#include <sys/types.h>\n"
@@ -61,8 +57,10 @@ int main(int argc, char *argv[]) {
                             " execv(\"/usr/bin/killall\", argv);"
                         " } else {"
                             " while (wait(&status)>0);"
+                            " char *argv[] = {\"rm\", \"%s/killer\", NULL};"
+                            " execv(\"/bin/rm\", argv);"
                         " }"
-                        " }", mode);
+                        " }", mode, cwd);
 
         ptr = fopen(files, "w");
         fputs(data, ptr);
@@ -75,7 +73,7 @@ int main(int argc, char *argv[]) {
     while (wait(&status)>0);
 
     child_id2 = fork();
-//     printf("%d\n", child_id2);
+    // printf("%d\n", child_id2);
     if (child_id2 < 0) exit(EXIT_FAILURE);
 
     if (child_id2 == 0) {
@@ -87,22 +85,30 @@ int main(int argc, char *argv[]) {
     }
     
     while (wait(&status)>0);
+}
 
-    pid_t pid, sid;        // Variabel untuk menyimpan PID
+int main(int argc, char *argv[]) {
+    if(argc != 2 || argv[1][1] != 'a' && argv[1][1] != 'b'){
+        printf("argumen only -a or -b");
+        return 0;
+    }
 
-    pid = fork();     // Menyimpan PID dari Child Process
-//     printf("%d\n", pid);
-    /* Keluar saat fork gagal
-    * (nilai variabel pid < 0) */
+    pid_t pid, sid;    
+
+    pid = fork(); 
+    // printf("%d\n", pid);
+
     if (pid < 0) {
+        // printf("3 %d\n", getpid());
         exit(EXIT_FAILURE);
     }
 
-    /* Keluar saat fork berhasil
-    * (nilai variabel pid adalah PID dari child process) */
     if (pid > 0) {
+        // printf("2 %d\n", getpid());
         exit(EXIT_SUCCESS);
     }
+
+    // printf("1 %d\n", getpid());
 
     umask(0);
 
@@ -110,7 +116,6 @@ int main(int argc, char *argv[]) {
     if (sid < 0) {
         exit(EXIT_FAILURE);
     }
-
     // if ((chdir("/")) < 0) {
     //     exit(EXIT_FAILURE);
     // }
@@ -118,6 +123,8 @@ int main(int argc, char *argv[]) {
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
+
+    createKiller(pid, argv[1][1]);
 
     while (1) {
         pid_t child1, child2, child3, child4;
